@@ -1,7 +1,10 @@
 set(LIB_NAME StyleTextDocument)
 set(LIB_SRC styletextdocument_global.h
+            overloadableproperty.h
+            abstractstyle.cpp
             abstracttextdocument.cpp
             abstracttextparagraph.cpp
+            unitvalue.cpp
             stylemanager.cpp
             paragraphstyle.cpp
             spanstyle.cpp

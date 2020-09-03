@@ -5,19 +5,71 @@
 namespace Style {
 
 ParagraphStyle::ParagraphStyle(QObject *parent) :
-	QObject (parent),
-	_parentStyle(nullptr)
+	AbstractStyle (parent),
+	_parentStyle(nullptr),
+	_spaceAbove(this,
+				&ParagraphStyle::spaceAbove,
+				&ParagraphStyle::spaceAboveChanged,
+				&ParagraphStyle::spaceAboveSetStatusChanged,
+				UnitValue(0, UnitValue::pt)),
+	_spaceBelow(this,
+				&ParagraphStyle::spaceBelow,
+				&ParagraphStyle::spaceBelowChanged,
+				&ParagraphStyle::spaceBelowSetStatusChanged,
+				UnitValue(0, UnitValue::pt)),
+	_lineSpace(this,
+				&ParagraphStyle::lineSpace,
+				&ParagraphStyle::lineSpaceChanged,
+				&ParagraphStyle::lineSpaceSetStatusChanged,
+				UnitValue(12, UnitValue::pt)),
+	_indentMargin(this,
+				&ParagraphStyle::indentMargin,
+				&ParagraphStyle::indentMarginChanged,
+				&ParagraphStyle::indentMarginSetStatusChanged,
+				UnitValue(0, UnitValue::pt)),
+	_leftMargin(this,
+				&ParagraphStyle::leftMargin,
+				&ParagraphStyle::leftMarginChanged,
+				&ParagraphStyle::leftMarginSetStatusChanged,
+				UnitValue(0, UnitValue::pt)),
+	_rightMargin(this,
+				&ParagraphStyle::rightMargin,
+				&ParagraphStyle::rightMarginChanged,
+				&ParagraphStyle::rightMarginSetStatusChanged,
+				UnitValue(0, UnitValue::pt)),
+	_doNotSplit(this,
+				&ParagraphStyle::doNotSplit,
+				&ParagraphStyle::doNotSplitChanged,
+				&ParagraphStyle::doNotSplitSetStatusChanged,
+				false),
+	_glueNbFirstLines(this,
+					  &ParagraphStyle::gluedFirstLines,
+					  &ParagraphStyle::gluedFirstLinesChanged,
+					  &ParagraphStyle::gluedFirstLinesSetStatusChanged,
+					  0),
+	_glueNbLastLines(this,
+					 &ParagraphStyle::gluedLastLines,
+					 &ParagraphStyle::gluedFirstLinesChanged,
+					 &ParagraphStyle::gluedLastLinesSetStatusChanged,
+					 0)
 {
 
 }
 ParagraphStyle::ParagraphStyle(ParagraphStyle* parent) :
-	QObject (parent),
-	_parentStyle(parent)
+	ParagraphStyle (static_cast<QObject*>(parent))
 {
-
+	setParentStyle(parent);
 }
 
-ParagraphStyle* ParagraphStyle::parentStyle() const {
+AbstractStyle::Styletype ParagraphStyle::styletype() const {
+	return AbstractStyle::ParagraphStyletype;
+}
+
+AbstractStyle* ParagraphStyle::styleParent() const {
+	return paragraphStyleParent();
+}
+
+ParagraphStyle* ParagraphStyle::paragraphStyleParent() const {
 	return _parentStyle;
 }
 void ParagraphStyle::setParentStyle(ParagraphStyle* parentStyle) {
@@ -27,128 +79,6 @@ void ParagraphStyle::setParentStyle(ParagraphStyle* parentStyle) {
 		Q_EMIT parentStyleChanged(_parentStyle);
 	}
 
-}
-
-quint32 ParagraphStyle::gluedFirstLines() const
-{
-	return _glueNbFirstLines;
-}
-
-void ParagraphStyle::setGluedFirstLines(const quint32 &glueNbFirstLines)
-{
-	if (_glueNbFirstLines != glueNbFirstLines) {
-		_glueNbFirstLines = glueNbFirstLines;
-		Q_EMIT gluedFirstLinesChanged(_glueNbLastLines);
-	}
-}
-
-quint32 ParagraphStyle::gluedLastLines() const
-{
-	return _glueNbLastLines;
-}
-
-void ParagraphStyle::setGluedLastLines(const quint32 &glueNbLastLines)
-{
-	if (_glueNbLastLines != glueNbLastLines) {
-		_glueNbLastLines = glueNbLastLines;
-		Q_EMIT gluedLastLinesChanged(_glueNbLastLines);
-	}
-}
-
-qreal ParagraphStyle::indentMargin() const
-{
-	return static_cast<qreal>(_indentMargin)/100.;
-}
-
-void ParagraphStyle::setIndentMargin(const qreal &im)
-{
-	qint32 f = static_cast<qint32>(std::round(im*100));
-	if (_indentMargin != f) {
-		_indentMargin = f;
-		Q_EMIT indentMarginChanged(indentMargin());
-	}
-}
-
-qreal ParagraphStyle::leftMargin() const
-{
-	return static_cast<qreal>(_leftMargin)/100.;
-}
-
-void ParagraphStyle::setLeftMargin(const qreal &lm)
-{
-	qint32 f = static_cast<qint32>(std::round(lm*100));
-	if (_leftMargin != f) {
-		_leftMargin = f;
-		Q_EMIT leftMarginChanged(leftMargin());
-	}
-}
-
-qreal ParagraphStyle::rightMargin() const
-{
-	return static_cast<qreal>(_rightMargin)/100.;
-}
-
-void ParagraphStyle::setRightMargin(const qreal &rm)
-{
-	qint32 f = static_cast<qint32>(std::round(rm*100));
-	if (_rightMargin != f) {
-		_rightMargin = f;
-		Q_EMIT rightMarginChanged(rightMargin());
-	}
-}
-
-bool ParagraphStyle::doNotSplit() const
-{
-	return _doNotSplit;
-}
-
-void ParagraphStyle::setDoNotSplit(bool doNotSplit)
-{
-	if (_doNotSplit != doNotSplit) {
-		_doNotSplit = doNotSplit;
-		Q_EMIT doNotSplitChanged(_doNotSplit);
-	}
-}
-
-qreal ParagraphStyle::spaceAbove() const
-{
-	return static_cast<qreal>(_spaceAbove)/100.;
-}
-
-void ParagraphStyle::setSpaceAbove(const qreal &sa)
-{qint32 f = static_cast<qint32>(std::round(sa*100));
-	if (_spaceAbove != f) {
-		_spaceAbove = f;
-		Q_EMIT spaceAboveChanged(spaceAbove());
-	}
-}
-
-qreal ParagraphStyle::spaceBelow() const
-{
-	return static_cast<qreal>(_spaceBelow)/100.;
-}
-
-void ParagraphStyle::setSpaceBelow(const qreal &sb)
-{
-	qint32 f = static_cast<qint32>(std::round(sb*100));
-	if (_spaceBelow != f) {
-		_spaceBelow = f;
-		Q_EMIT spaceBelowChanged(spaceBelow());
-	}
-}
-
-qreal ParagraphStyle::lineSpace() const
-{
-	return static_cast<qreal>(_lineSpace)/100.;
-}
-
-void ParagraphStyle::setLineSpace(const qreal &ls)
-{
-	qint32 f = static_cast<qint32>(std::round(ls*100));
-	if (_lineSpace != f) {
-		_lineSpace = f;
-		Q_EMIT lineSpaceChanged(lineSpace());
-	}
 }
 
 SpanStyle *ParagraphStyle::defaultSpanStyle() const
@@ -162,6 +92,170 @@ void ParagraphStyle::setDefaultSpanStyle(SpanStyle *defaultSpanStyle)
 		_defaultSpanStyle = defaultSpanStyle;
 		Q_EMIT defaultSpanStyleChanged(_defaultSpanStyle);
 	}
+}
+
+quint32 ParagraphStyle::gluedFirstLines() const
+{
+	return _glueNbFirstLines.getValue();
+}
+
+void ParagraphStyle::setGluedFirstLines(const quint32 &glueNbFirstLines)
+{
+	_glueNbFirstLines.setValue(glueNbFirstLines);
+}
+void ParagraphStyle::clearGlueadFirstLines() {
+	_glueNbFirstLines.clearValue();
+}
+bool ParagraphStyle::gluedFirstLinesSet() const {
+	return _glueNbFirstLines.isSet();
+}
+
+quint32 ParagraphStyle::gluedLastLines() const
+{
+	return _glueNbLastLines.getValue();
+}
+
+void ParagraphStyle::setGluedLastLines(const quint32 &glueNbLastLines)
+{
+	_glueNbLastLines.setValue(glueNbLastLines);
+}
+void ParagraphStyle::clearGlueadLastLines() {
+	_glueNbLastLines.clearValue();
+}
+bool ParagraphStyle::gluedLastLinesSet() const {
+	return _glueNbLastLines.isSet();
+}
+
+bool ParagraphStyle::doNotSplit() const
+{
+	return _doNotSplit.getValue();
+}
+
+void ParagraphStyle::setDoNotSplit(bool dns)
+{
+	_doNotSplit.setValue(dns);
+}
+
+void ParagraphStyle::clearDoNotSplit() {
+	_doNotSplit.clearValue();
+}
+bool ParagraphStyle::doNotSplitSet() const {
+	return _doNotSplit.isSet();
+}
+
+UnitValue ParagraphStyle::spaceAbove() const{
+	return _spaceAbove.getValue();
+}
+
+void ParagraphStyle::setSpaceAbove(const UnitValue &sa)
+{
+	if (sa.isValid()) {
+		_spaceAbove.setValue(sa);
+	} else {
+		clearSpaceAbove();
+	}
+}
+void ParagraphStyle::clearSpaceAbove() {
+	_spaceAbove.clearValue();
+}
+bool ParagraphStyle::spaceAboveSet() const {
+	return _spaceAbove.isSet();
+}
+
+UnitValue ParagraphStyle::spaceBelow() const{
+	return _spaceBelow.getValue();
+}
+
+void ParagraphStyle::setSpaceBelow(const UnitValue &sb)
+{
+	if(sb.isValid()) {
+		_spaceBelow.setValue(sb);
+	} else {
+		_spaceBelow.clearValue();
+	}
+}
+void ParagraphStyle::clearSpaceBelow() {
+	_spaceBelow.clearValue();
+}
+bool ParagraphStyle::spaceBelowSet() const {
+	return _spaceBelow.isSet();
+}
+
+UnitValue ParagraphStyle::lineSpace() const{
+	return _lineSpace.getValue();
+}
+
+void ParagraphStyle::setLineSpace(const UnitValue &ls)
+{
+	if (ls.isValid()) {
+		_lineSpace.setValue(ls);
+	} else {
+		clearLineSpace();
+	}
+}
+void ParagraphStyle::clearLineSpace() {
+	_lineSpace.clearValue();
+}
+bool ParagraphStyle::lineSpaceSet() const {
+	return _lineSpace.isSet();
+}
+
+UnitValue ParagraphStyle::indentMargin() const{
+	return _indentMargin.getValue();
+}
+
+void ParagraphStyle::setIndentMargin(const UnitValue &im)
+{
+	if (im.isValid()) {
+		_indentMargin.setValue(im);
+	} else {
+		clearIndentMargin();
+	}
+}
+void ParagraphStyle::clearIndentMargin() {
+	_indentMargin.clearValue();
+}
+bool ParagraphStyle::indentMarginSet() const {
+	return _indentMargin.isSet();
+}
+
+UnitValue ParagraphStyle::leftMargin() const{
+	return _leftMargin.getValue();
+}
+
+void ParagraphStyle::setLeftMargin(const UnitValue &lm)
+{
+	if (!lm.isValid()) {
+		clearLeftMargin();
+	} else {
+		_leftMargin.setValue(lm);
+	}
+}
+void ParagraphStyle::clearLeftMargin() {
+	_leftMargin.clearValue();
+}
+bool ParagraphStyle::leftMarginSet() const {
+	return _leftMargin.isSet();
+}
+
+UnitValue ParagraphStyle::rightMargin() const
+{
+	return _rightMargin.getValue();
+}
+
+void ParagraphStyle::setRightMargin(const UnitValue &rm)
+{
+	if (!rm.isValid()) {
+		clearRightMargin();
+	} else {
+		_rightMargin.setValue(rm);
+	}
+}
+void ParagraphStyle::clearRightMargin() {
+	_rightMargin.clearValue();
+}
+bool ParagraphStyle::rightMarginSet() {
+	return _rightMargin.isSet();
 }
 
 } // namespace Style
